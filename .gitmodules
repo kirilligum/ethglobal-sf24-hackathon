@@ -13,3 +13,6 @@
 [submodule "sonft/lib/layerzero-v2"]
 	path = sonft/lib/layerzero-v2
 	url = https://github.com/LayerZero-Labs/layerzero-v2
+[submodule "sonft/lib/openzeppelin-contracts"]
+	path = sonft/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
