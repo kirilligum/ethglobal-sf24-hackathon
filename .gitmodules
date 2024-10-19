@@ -10,3 +10,6 @@
 [submodule "sonft/lib/devtools"]
 	path = sonft/lib/devtools
 	url = https://github.com/LayerZero-Labs/devtools
+[submodule "sonft/lib/layerzero-v2"]
+	path = sonft/lib/layerzero-v2
+	url = https://github.com/LayerZero-Labs/layerzero-v2
