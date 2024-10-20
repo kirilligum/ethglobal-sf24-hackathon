@@ -1,68 +1,34 @@
-import { useEffect, useState } from 'react'
-import { useAccount, useConnect, useContractWrite, useDisconnect, useNetwork, usePrepareContractWrite } from 'wagmi'
-import { InjectedConnector } from 'wagmi/connectors/injected'
-import { Web3Button } from '@web3modal/react'
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
 import './App.css'
 
-const contractABI = [
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "mint",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-]
-const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE" // Replace with your deployed contract address
-
 function App() {
-  const { address, isConnected } = useAccount()
-  const { connect } = useConnect({
-    connector: new InjectedConnector(),
-  })
-  const { disconnect } = useDisconnect()
-  const { chain } = useNetwork()
-
-  const { config } = usePrepareContractWrite({
-    address: contractAddress,
-    abi: contractABI,
-    functionName: 'mint',
-    args: [address],
-  })
-  const { write: mint, isLoading, isSuccess } = useContractWrite(config)
-
-  const [status, setStatus] = useState('')
-
-  useEffect(() => {
-    if (isSuccess) {
-      setStatus('NFT minted successfully!')
-    }
-  }, [isSuccess])
+  const [count, setCount] = useState(0)
 
   return (
-    <div className="App">
-      <h1>MyNFT Minter</h1>
-      <Web3Button />
-      {isConnected ? (
-        <div>
-          <p>Connected Account: {address}</p>
-          <p>Network: {chain?.name}</p>
-          <button onClick={() => mint?.()} disabled={!mint || isLoading}>
-            {isLoading ? 'Minting...' : 'Mint NFT'}
-          </button>
-          <p>{status}</p>
-          <button onClick={() => disconnect()}>Disconnect</button>
-        </div>
-      ) : (
-        <p>Please connect your wallet to mint NFTs</p>
-      )}
-    </div>
+    <>
+      <div>
+        <a href="https://vitejs.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <p>
+          Edit <code>src/App.jsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+    </>
   )
 }
 
