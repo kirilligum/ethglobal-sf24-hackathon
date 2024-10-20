@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
+import { useEffect, useState } from 'react'
+import { useAccount, useConnect, useContractWrite, useDisconnect, useNetwork, usePrepareContractWrite } from 'wagmi'
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import { Web3Button } from '@web3modal/react'
 import './App.css'
 
 const contractABI = [
@@ -20,66 +22,45 @@ const contractABI = [
 const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE" // Replace with your deployed contract address
 
 function App() {
-  const [account, setAccount] = useState('')
-  const [provider, setProvider] = useState(null)
-  const [signer, setSigner] = useState(null)
-  const [contract, setContract] = useState(null)
+  const { address, isConnected } = useAccount()
+  const { connect } = useConnect({
+    connector: new InjectedConnector(),
+  })
+  const { disconnect } = useDisconnect()
+  const { chain } = useNetwork()
+
+  const { config } = usePrepareContractWrite({
+    address: contractAddress,
+    abi: contractABI,
+    functionName: 'mint',
+    args: [address],
+  })
+  const { write: mint, isLoading, isSuccess } = useContractWrite(config)
+
+  const [status, setStatus] = useState('')
 
   useEffect(() => {
-    const init = async () => {
-      if (window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum)
-        setProvider(provider)
-
-        const signer = await provider.getSigner()
-        setSigner(signer)
-
-        const contract = new ethers.Contract(contractAddress, contractABI, signer)
-        setContract(contract)
-      } else {
-        console.log('Please install MetaMask!')
-      }
+    if (isSuccess) {
+      setStatus('NFT minted successfully!')
     }
-    init()
-  }, [])
-
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-        setAccount(accounts[0])
-      } catch (error) {
-        console.error("Failed to connect wallet:", error)
-      }
-    } else {
-      console.log('Please install MetaMask!')
-    }
-  }
-
-  const mintNFT = async () => {
-    if (!contract) {
-      console.log('Contract not initialized')
-      return
-    }
-    try {
-      const tx = await contract.mint(account)
-      await tx.wait()
-      console.log('NFT minted successfully!')
-    } catch (error) {
-      console.error("Failed to mint NFT:", error)
-    }
-  }
+  }, [isSuccess])
 
   return (
     <div className="App">
       <h1>MyNFT Minter</h1>
-      {!account ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
-      ) : (
+      <Web3Button />
+      {isConnected ? (
         <div>
-          <p>Connected Account: {account}</p>
-          <button onClick={mintNFT}>Mint NFT</button>
+          <p>Connected Account: {address}</p>
+          <p>Network: {chain?.name}</p>
+          <button onClick={() => mint?.()} disabled={!mint || isLoading}>
+            {isLoading ? 'Minting...' : 'Mint NFT'}
+          </button>
+          <p>{status}</p>
+          <button onClick={() => disconnect()}>Disconnect</button>
         </div>
+      ) : (
+        <p>Please connect your wallet to mint NFTs</p>
       )}
     </div>
   )
